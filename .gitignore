@@ -1,0 +1,23 @@
+# --- Segredos ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+
+# --- Ambiente virtual (uv) ---
+.venv/
+
+# --- Caches de ferramentas ---
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Editor e sistema operacional ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
