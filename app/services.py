@@ -1,5 +1,6 @@
 """Regras de negócio do encurtador, usadas tanto pela API quanto pela página web."""
 
+import logging
 import secrets
 import string
 
@@ -8,6 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models import Click, Link
+from app.observability.metrics import LINKS_CREATED, REDIRECTS
+
+logger = logging.getLogger(__name__)
 
 ALPHABET = string.ascii_letters + string.digits
 CODE_LENGTH = 7
@@ -26,6 +30,8 @@ def create_link(db: Session, target_url: str) -> Link:
             db.add(link)
             db.commit()
             db.refresh(link)
+            LINKS_CREATED.inc()
+            logger.info("link criado", extra={"code": code})
             return link
     raise RuntimeError("Não foi possível gerar um código único")
 
@@ -37,6 +43,7 @@ def get_link(db: Session, code: str) -> Link | None:
 def register_click(db: Session, link: Link) -> None:
     db.add(Click(link_id=link.id))
     db.commit()
+    REDIRECTS.inc()
 
 
 def count_clicks(db: Session, link: Link) -> int:
