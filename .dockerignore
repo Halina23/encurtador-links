@@ -1,0 +1,34 @@
+# --- Segredos: nunca entram no contexto de build ---
+.env
+.env.*
+!.env.example
+
+# --- Git e CI ---
+.git
+.github
+
+# --- Python ---
+.venv/
+__pycache__/
+*.py[cod]
+
+# --- Caches de ferramentas ---
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Não fazem parte da imagem ---
+tests/
+docs/
+deploy/
+*.md
+Dockerfile
+.dockerignore
+compose.yaml
+
+# --- Editor e sistema operacional ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
