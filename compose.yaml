@@ -1,0 +1,58 @@
+name: encurtador-links
+
+# Bloco reutilizável (âncora YAML). Os valores vêm do arquivo .env.
+# O ":?" faz o Compose parar com erro se a variável não estiver definida.
+x-database-url: &database-url "postgresql+psycopg://${POSTGRES_USER:?defina no .env}:${POSTGRES_PASSWORD:?defina no .env}@db:5432/${POSTGRES_DB:?defina no .env}"
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    # Sem "ports": o banco só é acessível pela rede interna do Compose.
+    healthcheck:
+      # $$ escapa o $ para a variável ser lida dentro do container.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  migrate:
+    image: encurtador-links:dev
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build: .
+    image: encurtador-links:dev
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: *database-url
+      BASE_URL: ${BASE_URL:-http://localhost:8000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      # A imagem slim não tem curl, então usamos o próprio Python.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  pgdata:
