@@ -1,13 +1,13 @@
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import HttpUrl, TypeAdapter, ValidationError
-from sqlalchemy.orm import Session
 
 from app import services
-from app.database import get_db
+from app.database import DbSession
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates")
@@ -20,16 +20,17 @@ def index(request: Request) -> HTMLResponse:
 
 
 @router.post("/", response_class=HTMLResponse)
-def shorten_from_form(
-    request: Request, url: str = Form(...), db: Session = Depends(get_db)
-) -> HTMLResponse:
+def shorten_from_form(request: Request, url: Annotated[str, Form()], db: DbSession) -> HTMLResponse:
     try:
         valid_url = url_validator.validate_python(url)
     except ValidationError:
         return templates.TemplateResponse(
             request,
             "index.html",
-            {"error": "URL inválida. Use um endereço começando com http:// ou https://", "url": url},
+            {
+                "error": "URL inválida. Use um endereço começando com http:// ou https://",
+                "url": url,
+            },
             status_code=422,
         )
     link = services.create_link(db, str(valid_url))

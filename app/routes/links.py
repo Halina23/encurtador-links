@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app import services
-from app.database import get_db
+from app.database import DbSession
 from app.models import Link
 from app.schemas import LinkCreate, LinkOut
 
@@ -28,19 +28,19 @@ def _get_or_404(db: Session, code: str) -> Link:
 
 
 @router.post("/api/links", status_code=201)
-def create_link(payload: LinkCreate, db: Session = Depends(get_db)) -> LinkOut:
+def create_link(payload: LinkCreate, db: DbSession) -> LinkOut:
     link = services.create_link(db, str(payload.url))
     return _to_out(db, link)
 
 
 @router.get("/api/links/{code}")
-def link_stats(code: str, db: Session = Depends(get_db)) -> LinkOut:
+def link_stats(code: str, db: DbSession) -> LinkOut:
     return _to_out(db, _get_or_404(db, code))
 
 
 # Rota "pega-tudo": precisa ser registrada por último no main.py.
 @router.get("/{code}")
-def redirect(code: str, db: Session = Depends(get_db)) -> RedirectResponse:
+def redirect(code: str, db: DbSession) -> RedirectResponse:
     link = _get_or_404(db, code)
     services.register_click(db, link)
     # 307 (temporário) em vez de 301: o navegador não guarda o redirecionamento
