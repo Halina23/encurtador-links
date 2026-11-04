@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.database import DbSession
 
 router = APIRouter(tags=["saúde"])
 
@@ -16,12 +15,10 @@ def health() -> dict:
 
 
 @router.get("/ready")
-def ready(db: Session = Depends(get_db)) -> JSONResponse:
+def ready(db: DbSession) -> JSONResponse:
     """Readiness: a aplicação está pronta para receber tráfego (banco acessível)."""
     try:
         db.execute(text("SELECT 1"))
     except SQLAlchemyError:
-        return JSONResponse(
-            status_code=503, content={"status": "error", "database": "unavailable"}
-        )
+        return JSONResponse(status_code=503, content={"status": "error", "database": "unavailable"})
     return JSONResponse(content={"status": "ok", "database": "ok"})
