@@ -3,7 +3,7 @@
 # =============================================================================
 # Estágio 1: builder ("oficina") - instala as dependências num .venv
 # =============================================================================
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b AS builder
 
 # Copia só o executável do uv da imagem oficial (sem instalar nada via pip).
 COPY --from=ghcr.io/astral-sh/uv:0.13.1 /uv /usr/local/bin/uv
@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # =============================================================================
 # Estágio 2: imagem final - só o necessário para rodar
 # =============================================================================
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
 
 # PYTHONDONTWRITEBYTECODE: não grava .pyc em tempo de execução.
 # PYTHONUNBUFFERED: os logs saem no stdout na hora, sem ficar presos em buffer.
