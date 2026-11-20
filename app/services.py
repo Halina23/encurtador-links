@@ -50,5 +50,7 @@ def count_clicks(db: Session, link: Link) -> int:
     return db.scalar(select(func.count(Click.id)).where(Click.link_id == link.id))
 
 
-def short_url(code: str) -> str:
-    return f"{settings.base_url.rstrip('/')}/{code}"
+def short_url(code: str, request_base_url: str) -> str:
+    """Monta o link curto. Usa BASE_URL se definido; senão, o endereço da requisição."""
+    base = settings.base_url or request_base_url
+    return f"{base.rstrip('/')}/{code}"

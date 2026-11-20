@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -10,10 +10,10 @@ from app.schemas import LinkCreate, LinkOut
 router = APIRouter(tags=["links"])
 
 
-def _to_out(db: Session, link: Link) -> LinkOut:
+def _to_out(db: Session, link: Link, request: Request) -> LinkOut:
     return LinkOut(
         code=link.code,
-        short_url=services.short_url(link.code),
+        short_url=services.short_url(link.code, str(request.base_url)),
         target_url=link.target_url,
         created_at=link.created_at,
         clicks=services.count_clicks(db, link),
@@ -28,14 +28,14 @@ def _get_or_404(db: Session, code: str) -> Link:
 
 
 @router.post("/api/links", status_code=201)
-def create_link(payload: LinkCreate, db: DbSession) -> LinkOut:
+def create_link(payload: LinkCreate, db: DbSession, request: Request) -> LinkOut:
     link = services.create_link(db, str(payload.url))
-    return _to_out(db, link)
+    return _to_out(db, link, request)
 
 
 @router.get("/api/links/{code}")
-def link_stats(code: str, db: DbSession) -> LinkOut:
-    return _to_out(db, _get_or_404(db, code))
+def link_stats(code: str, db: DbSession, request: Request) -> LinkOut:
+    return _to_out(db, _get_or_404(db, code), request)
 
 
 # Rota "pega-tudo": precisa ser registrada por último no main.py.
