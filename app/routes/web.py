@@ -37,5 +37,8 @@ def shorten_from_form(request: Request, url: Annotated[str, Form()], db: DbSessi
     return templates.TemplateResponse(
         request,
         "index.html",
-        {"short_url": services.short_url(link.code), "url": link.target_url},
+        {
+            "short_url": services.short_url(link.code, str(request.base_url)),
+            "url": link.target_url,
+        },
     )

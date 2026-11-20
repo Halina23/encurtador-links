@@ -37,3 +37,21 @@ def test_codigos_sao_unicos(client):
     }
 
     assert len(codes) == 20
+
+
+def test_short_url_usa_endereco_da_requisicao_sem_base_url(client, monkeypatch):
+    monkeypatch.setattr("app.services.settings.base_url", "")
+
+    body = client.post(
+        "/api/links", json={"url": "https://example.com/"}, headers={"Host": "203.0.113.10"}
+    ).json()
+
+    assert body["short_url"] == f"http://203.0.113.10/{body['code']}"
+
+
+def test_short_url_usa_base_url_quando_definido(client, monkeypatch):
+    monkeypatch.setattr("app.services.settings.base_url", "https://encurta.exemplo.com/")
+
+    body = client.post("/api/links", json={"url": "https://example.com/"}).json()
+
+    assert body["short_url"] == f"https://encurta.exemplo.com/{body['code']}"

@@ -66,7 +66,7 @@ Variáveis lidas do `.env` (modelo em [`.env.example`](.env.example)):
 | Variável | Descrição | Padrão |
 |---|---|---|
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Credenciais do banco | obrigatórias |
-| `BASE_URL` | Endereço usado para montar os links curtos | `http://localhost:8000` |
+| `BASE_URL` | Endereço usado para montar os links curtos. Vazio: usa o endereço da requisição | vazio (o `compose.yaml` define `http://localhost:8000`) |
 | `LOG_LEVEL` | Nível dos logs | `INFO` |
 | `APP_PORT` | Porta da sua máquina onde a aplicação fica acessível | `8000` |
 
