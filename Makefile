@@ -1,6 +1,6 @@
 # Atalhos do dia a dia. Rode "make" para ver a lista.
 .DEFAULT_GOAL := help
-.PHONY: help up down logs ps test-db test lint format hadolint check
+.PHONY: help up down logs ps test-db test lint format hadolint check carga
 
 TEST_DB := encurtador-test-db
 
@@ -48,3 +48,11 @@ hadolint: ## Verifica o Dockerfile
 	docker run --rm -i hadolint/hadolint:v2.15.1 < Dockerfile
 
 check: lint hadolint test ## Roda tudo o que o CI vai rodar
+
+# --- Teste de carga ---
+
+TIPO ?= smoke
+BASE_URL ?= http://localhost:8000
+
+carga: ## Teste de carga com k6 (TIPO=smoke|load|stress BASE_URL=http://...)
+	k6 run -e TIPO=$(TIPO) -e BASE_URL=$(BASE_URL) tests/carga/encurtador.js
