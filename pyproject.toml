@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.20.1",
-    "fastapi>=0.162.2",
+    "fastapi>=0.164.0",
     # Exigido pela instrumentação do SQLAlchemy (OpenTelemetry), que importa o
     # módulo asyncio do SQLAlchemy; na 2.1 o greenlet deixou de vir junto.
     "greenlet>=3.5.6",
@@ -15,19 +15,19 @@ dependencies = [
     "opentelemetry-sdk>=1.45.2",
     "prometheus-client>=0.26.0",
     "psycopg[binary]>=3.3.6",
-    "pydantic-settings>=2.16.2",
+    "pydantic-settings>=2.16.3",
     "python-json-logger>=4.2.0",
-    "python-multipart>=0.0.33",
-    "sqlalchemy>=2.1.8",
+    "python-multipart>=0.0.34",
+    "sqlalchemy>=2.1.9",
     "uvicorn[standard]>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
-    "httpx2>=2.16.0",
+    "httpx2>=2.16.2",
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
-    "ruff>=0.17.4",
+    "ruff>=0.17.5",
 ]
 
 [tool.pytest.ini_options]
