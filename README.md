@@ -96,6 +96,25 @@ desfeitas, então elas também são testadas.
 | `make lint` / `make format` | Verifica / corrige o código com Ruff |
 | `make hadolint` | Verifica o Dockerfile |
 | `make check` | Tudo o que o CI roda |
+| `make carga TIPO=load BASE_URL=http://...` | Teste de carga com k6 (`smoke`, `load` ou `stress`) |
+
+### Teste de carga (k6)
+
+O roteiro [`tests/carga/encurtador.js`](tests/carga/encurtador.js) simula o uso
+típico: 80% abrindo links, 15% criando links e 5% acessando códigos inexistentes.
+
+| Tipo | Usuários virtuais | Duração |
+|---|---|---|
+| `smoke` | 1 | 30 s |
+| `load` | até 20 | 5 min |
+| `stress` | até 150 | 8 min |
+
+Critérios de aprovação: menos de 1% de falhas, p95 abaixo de 1 s e mais de 99%
+dos checks corretos. Resultados do teste no ambiente da AWS (pod limitado a
+0,5 núcleo de CPU): sem falhas até 150 usuários; a latência no servidor sobe a
+partir de ~90 req/s e o pod satura em ~113 req/s. Detalhes no
+[postmortem 006](https://github.com/Halina23/gitops-pipeline-com-gate-de-qualidade/blob/master/docs/incidentes/006-teste-de-carga-limite-de-cpu.md)
+do repositório da plataforma.
 
 ## Observabilidade
 
