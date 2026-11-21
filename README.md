@@ -68,6 +68,8 @@ Variáveis lidas do `.env` (modelo em [`.env.example`](.env.example)):
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Credenciais do banco | obrigatórias |
 | `BASE_URL` | Endereço usado para montar os links curtos. Vazio: usa o endereço da requisição | vazio (o `compose.yaml` define `http://localhost:8000`) |
 | `LOG_LEVEL` | Nível dos logs | `INFO` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Para onde enviar os traces (OTLP/HTTP, ex.: `http://alloy:4318`). Vazio: traces desligados | vazio |
+| `OTEL_SERVICE_NAME` | Nome do serviço nos traces | `encurtador` |
 | `APP_PORT` | Porta da sua máquina onde a aplicação fica acessível | `8000` |
 
 ## Desenvolvimento
@@ -118,8 +120,12 @@ do repositório da plataforma.
 
 ## Observabilidade
 
-- **Logs:** JSON no stdout, com `request_id` em todos os logs de uma mesma
-  requisição. As chamadas a `/health`, `/ready` e `/metrics` não geram log.
+- **Logs:** JSON no stdout, com `request_id` e `trace_id` em todos os logs de
+  uma mesma requisição. As chamadas a `/health`, `/ready` e `/metrics` não geram log.
+- **Traces** (OpenTelemetry): cada requisição vira um trace, com um span para o
+  HTTP e um span filho para cada consulta ao banco, enviados por OTLP. O
+  `trace_id` nos logs liga um log ao trace dele (no Grafana: Loki → Tempo). Se o
+  coletor estiver fora do ar, a aplicação segue normal e só registra um aviso.
 - **Métricas** (método RED):
   - `http_requests_total{method, route, status}`
   - `http_request_duration_seconds{method, route}` (histograma)
